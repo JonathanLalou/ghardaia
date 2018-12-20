@@ -1,4 +1,4 @@
-package fr.sayasoft.dilugim
+package fr.sayasoft.ghardaia
 
 
 import java.time.Duration

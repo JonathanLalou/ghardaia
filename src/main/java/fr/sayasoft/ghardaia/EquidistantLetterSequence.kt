@@ -1,4 +1,4 @@
-package fr.sayasoft.dilugim
+package fr.sayasoft.ghardaia
 
 data class EquidistantLetterSequence(
         var distance: Int? = null,

@@ -1,9 +1,9 @@
-package fr.sayasoft.dilugim
+package fr.sayasoft.ghardaia
 
-import org.junit.Ignore
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
-@Ignore
+@Disabled
 class ShortestJumpUnitTest {
     @Test
     void testShortestInAllBooks() {

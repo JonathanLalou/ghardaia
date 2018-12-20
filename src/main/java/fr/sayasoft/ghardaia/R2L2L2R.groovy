@@ -1,4 +1,4 @@
-package fr.sayasoft.dilugim
+package fr.sayasoft.ghardaia
 
 import org.apache.commons.lang3.StringUtils
 
