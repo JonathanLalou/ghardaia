@@ -1,32 +1,34 @@
 package fr.sayasoft.ghardaia
 
 
+import groovy.util.logging.Log4j2
+import org.springframework.stereotype.Component
+
 import java.time.Duration
 import java.time.LocalDateTime
 
 import static org.apache.commons.lang3.StringUtils.substring
 
-//@Log4j
+@Log4j2
+@Component
 class ElsComponent {
     Optional<EquidistantLetterSequence> retrieveELS(String search, String book, radius = 5, includeReverseOrder = false, minDistance = 0, maxDistance = 1000) {
+        log.info("Searching for...   : ${search}")
         final LocalDateTime t0 = LocalDateTime.now();
         def searchSize = search.size()
         final Integer shortestEquidistantSequence, firstLetterIndex
 
         for (int step = minDistance; step < maxDistance; step++) {
-            println("Testing step: ${step}")
-// log.info("Testing step: ${step}")
+            if (log.isTraceEnabled()) log.trace("Testing step: ${step}")
             final StringBuilder stringBuilder = new StringBuilder("((\\w)*)")
             for (int i = 0; i < searchSize; i++) {
                 stringBuilder.append("(${search.charAt(i)})").append("((\\w){$step})")
             }
             def regexp = stringBuilder.toString()
-// println "with regexp: ${regexp}"
+            if (log.isTraceEnabled()) log.trace("with regexp: ${regexp}")
             def group = (book =~ regexp)
-// NB: by default, the regexp gets the shortest matching string
+            // NB: by default, the regexp gets the shortest matching string
             if (group.hasGroup() && group.size() > 0) {
-                assert group.hasGroup()
-                assert 'J' == group[0][3]
                 shortestEquidistantSequence = step
                 firstLetterIndex = group[0][1].size()
                 break
@@ -35,21 +37,26 @@ class ElsComponent {
         if (null == shortestEquidistantSequence) {
             return Optional.empty()
         }
-// println "Shortest sequence : ${shortestEquidistantSequence}"
-// println "First letter index : ${firstLetterIndex}"
         final StringBuilder matrixBuilder = new StringBuilder()
         for (int i = 0; i < searchSize; i++) {
-            matrixBuilder.append(substring(book, firstLetterIndex + (i * shortestEquidistantSequence) - radius + i, firstLetterIndex + (i * shortestEquidistantSequence) + radius + i)).append("\n")
+            matrixBuilder.append(substring(book, firstLetterIndex + (i * shortestEquidistantSequence) - radius + i, firstLetterIndex + (i * shortestEquidistantSequence) + radius + i + 1)).append("\n")
         }
+        def equidistantLetterSequence = new EquidistantLetterSequence(
+                distance: shortestEquidistantSequence,
+                firstLetterIndex: firstLetterIndex,
+                matrix: matrixBuilder.toString(),
+                bookSize: book.size(),
+                calculationTime: Math.abs(Duration.between(t0, LocalDateTime.now()).toMillis())
+        )
+
+        log.info("Book size          : ${equidistantLetterSequence.bookSize} letters")
+        log.info("Calculation time   : ${equidistantLetterSequence.calculationTime} ms")
+        log.info("Shortest sequence  : ${equidistantLetterSequence.distance} letters")
+        log.info("First letter index : #${equidistantLetterSequence.firstLetterIndex}")
+        log.info("Matrix             : \n" + equidistantLetterSequence.matrix)
 
         return Optional.of(
-                new EquidistantLetterSequence(
-                        distance: shortestEquidistantSequence,
-                        firstLetterIndex: firstLetterIndex,
-                        matrix: matrixBuilder.toString(),
-                        bookSize: book.size(),
-                        calculationTime: Math.abs(Duration.between(t0, LocalDateTime.now()).toMillis())
-                )
+                equidistantLetterSequence
         )
     }
 }

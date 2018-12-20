@@ -1,9 +1,7 @@
 package fr.sayasoft.ghardaia
 
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
-@Disabled
 class ElsComponentUnitTest {
     static final String book =
             "BEGIN" +
@@ -51,14 +49,14 @@ class ElsComponentUnitTest {
         assert 1724 == equidistantLetterSequence.bookSize
         assert 77 == equidistantLetterSequence.distance
         assert 425 == equidistantLetterSequence.firstLetterIndex
-        assert "sgaJxx\n" +
-                "sgaOyy\n" +
-                "sgaNzz\n" +
-                "sgaAtt\n" +
-                "sgaTuu\n" +
-                "sgaHvv\n" +
-                "sgaAww\n" +
-                "sgaNss\n" == equidistantLetterSequence.matrix
+        assert  "sgaJxxx\n" +
+                "sgaOyyy\n" +
+                "sgaNzzz\n" +
+                "sgaAttt\n" +
+                "sgaTuuu\n" +
+                "sgaHvvv\n" +
+                "sgaAwww\n" +
+                "sgaNsss\n" == equidistantLetterSequence.matrix
 
         elsOptional = new ElsComponent().retrieveELS(search, book, radius, false, 150, 170)
         assert elsOptional.isPresent()
@@ -67,21 +65,13 @@ class ElsComponentUnitTest {
         assert 1724 == equidistantLetterSequence.bookSize
         assert 155 == equidistantLetterSequence.distance
         assert 239 == equidistantLetterSequence.firstLetterIndex
-        assert "bhsJhf\n" +
-                "bhsOhf\n" +
-                "bhsNhf\n" +
-                "bhsAhf\n" +
-                "bhsThf\n" +
-                "bhsHhf\n" +
-                "bhsAhf\n" +
-                "bhsNhf\n" == equidistantLetterSequence.matrix
-
-//        println "Book size : ${equidistantLetterSequence.bookSize} letters"
-//        println "Calculation time : ${equidistantLetterSequence.calculationTime} ms"
-//        println "Shortest sequence : ${equidistantLetterSequence.distance} letters"
-//        println "First letter index : #${equidistantLetterSequence.firstLetterIndex}"
-//        println("Matrix: \n")
-//        println(equidistantLetterSequence.matrix)
-
+        assert  "bhsJhfk\n" +
+                "bhsOhfk\n" +
+                "bhsNhfk\n" +
+                "bhsAhfk\n" +
+                "bhsThfk\n" +
+                "bhsHhfk\n" +
+                "bhsAhfk\n" +
+                "bhsNhfk\n" == equidistantLetterSequence.matrix
     }
 }
