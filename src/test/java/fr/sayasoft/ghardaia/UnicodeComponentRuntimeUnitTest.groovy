@@ -2,10 +2,10 @@ package fr.sayasoft.ghardaia
 
 import org.junit.jupiter.api.Test
 
-class R2L2L2RRuntimeUnitTest {
+class UnicodeComponentRuntimeUnitTest {
     public static final int GENESIS_LENGTH = 78177
     public static final int EXODUS_LENGTH = 63621
-    final R2L2L2R instance = new R2L2L2R()
+    final UnicodeComponent instance = new UnicodeComponent()
 
     @Test
     void "format Genesis"() {

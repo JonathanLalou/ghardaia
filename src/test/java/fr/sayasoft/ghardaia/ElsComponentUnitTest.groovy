@@ -38,7 +38,7 @@ class ElsComponentUnitTest {
 
     @Test
     void retrieveELS_OK() {
-//        final String book = new R2L2L2R().formatFolder('src/main/resources')
+//        final String book = new UnicodeComponent().formatFolder('src/main/resources')
         final String search = "JONATHAN"
         def radius = 3
 
