@@ -39,6 +39,7 @@ class UnicodeComponent {
             ('ר' as Character): ("R" as Character),
             ('ש' as Character): ("W" as Character), // /!\ non-intuitive
             ('ת' as Character): ("T" as Character), // /!\ not to be confused with Teth / X
+            ('\n' as Character): ("\n" as Character),
     ])
 
     static final BiMap<Character, Character> LATIN_TO_HEBREW_TRANSLITTERATION = HEBREW_TO_LATIN_TRANSLITTERATION.inverse()
@@ -73,7 +74,10 @@ class UnicodeComponent {
     String translitterateToLatin(String szHebrew) {
         final StringBuilder stringBuilder = new StringBuilder()
         for (int i = 0; i < szHebrew.size(); i++) {
-            stringBuilder.append(HEBREW_TO_LATIN_TRANSLITTERATION[szHebrew.charAt(i)])
+            def hebrewChar = szHebrew.charAt(i)
+            if (HEBREW_TO_LATIN_TRANSLITTERATION.containsKey(hebrewChar)) {
+                stringBuilder.append(HEBREW_TO_LATIN_TRANSLITTERATION[hebrewChar])
+            }
         }
         return stringBuilder.toString()
     }
@@ -81,8 +85,12 @@ class UnicodeComponent {
     String translitterateToHebrew(String szLatin) {
         final StringBuilder stringBuilder = new StringBuilder()
         for (int i = 0; i < szLatin.size(); i++) {
-            stringBuilder.append(LATIN_TO_HEBREW_TRANSLITTERATION[szLatin.charAt(i)])
+            def latinChar = szLatin.charAt(i)
+            if (LATIN_TO_HEBREW_TRANSLITTERATION.containsKey(latinChar)) {
+                stringBuilder.append(LATIN_TO_HEBREW_TRANSLITTERATION[latinChar])
+            }
         }
         return stringBuilder.toString()
     }
+
 }

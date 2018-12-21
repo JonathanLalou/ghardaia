@@ -1,6 +1,5 @@
 package fr.sayasoft.ghardaia
 
-
 import groovy.util.logging.Log4j2
 import org.springframework.stereotype.Component
 
@@ -12,6 +11,36 @@ import static org.apache.commons.lang3.StringUtils.substring
 @Log4j2
 @Component
 class ElsComponent {
+//    @Autowired
+    UnicodeComponent unicodeComponent = new UnicodeComponent()
+
+    Optional<EquidistantLetterSequence> translitterateAndretrieveELS(String search, String book, radius = 5, includeReverseOrder = false, minDistance = 0, maxDistance = 1000) {
+        final String latinSearch = unicodeComponent.translitterateToLatin(search)
+        final String latinBook = unicodeComponent.translitterateToLatin(book)
+        def optionalEquidistantLetterSequence = retrieveELS(latinSearch, latinBook, radius, includeReverseOrder, minDistance, maxDistance)
+        if(optionalEquidistantLetterSequence.isPresent()){
+            def equidistantLetterSequence = new EquidistantLetterSequence(
+                    distance: optionalEquidistantLetterSequence.get().distance,
+                    firstLetterIndex: optionalEquidistantLetterSequence.get().firstLetterIndex,
+                    matrix: unicodeComponent.translitterateToHebrew(optionalEquidistantLetterSequence.get().matrix),
+                    bookSize: optionalEquidistantLetterSequence.get().bookSize,
+                    calculationTime: optionalEquidistantLetterSequence.get().calculationTime
+            )
+
+            log.info("Book size          : ${equidistantLetterSequence.bookSize} letters")
+            log.info("Calculation time   : ${equidistantLetterSequence.calculationTime} ms")
+            log.info("Shortest sequence  : ${equidistantLetterSequence.distance} letters")
+            log.info("First letter index : #${equidistantLetterSequence.firstLetterIndex}")
+            log.info("Matrix             : \n" + equidistantLetterSequence.matrix)
+
+            return Optional.of(
+                    equidistantLetterSequence
+            )
+
+        }
+        return Optional.empty()
+    }
+
     Optional<EquidistantLetterSequence> retrieveELS(String search, String book, radius = 5, includeReverseOrder = false, minDistance = 0, maxDistance = 1000) {
         log.info("Searching for...   : ${search}")
         final LocalDateTime t0 = LocalDateTime.now();
