@@ -31,9 +31,9 @@ class ElsComponentUnitTest {
 
     @Test
     void retrieveELSByRegexp_notFound() {
-        assert !new ElsComponent().retrieveELSByRegexp("ABCDEFGH", book).isPresent()
-        assert !new ElsComponent().retrieveELSByRegexp("JONATHAN", book, 5, false, 200, 300).isPresent()
-        assert !new ElsComponent().retrieveELSByRegexp("JONATHAN", book, 5, false, 10, 20).isPresent()
+        assert !new ElsComponent().retrieveELS("ABCDEFGH", book, 5, false, 0, 1000, SearchMode.REGEXP).isPresent()
+        assert !new ElsComponent().retrieveELS("JONATHAN", book, 5, false, 200, 300, SearchMode.REGEXP).isPresent()
+        assert !new ElsComponent().retrieveELS("JONATHAN", book, 5, false, 10, 20, SearchMode.REGEXP).isPresent()
     }
 
     @Test
@@ -42,7 +42,7 @@ class ElsComponentUnitTest {
         final String search = "JONATHAN"
         def radius = 3
 
-        def elsOptional = new ElsComponent().retrieveELSByRegexp(search, book, radius, false, 60, 100)
+        def elsOptional = new ElsComponent().retrieveELS(search, book, radius, false, 60, 100, SearchMode.REGEXP)
         assert elsOptional.isPresent()
 
         def equidistantLetterSequence = elsOptional.get()
@@ -58,7 +58,7 @@ class ElsComponentUnitTest {
                 "sgaAwww\n" +
                 "sgaNsss\n" == equidistantLetterSequence.matrix
 
-        elsOptional = new ElsComponent().retrieveELSByRegexp(search, book, radius, false, 150, 170)
+        elsOptional = new ElsComponent().retrieveELS(search, book, radius, false, 150, 170, SearchMode.REGEXP)
         assert elsOptional.isPresent()
 
         equidistantLetterSequence = elsOptional.get()
@@ -77,9 +77,9 @@ class ElsComponentUnitTest {
 
     @Test
     void retrieveELSInteratively_notFound() {
-        assert !new ElsComponent().retrieveELSInteratively("ABCDEFGH", book).isPresent()
-        assert !new ElsComponent().retrieveELSInteratively("JONATHAN", book, 5, false, 200, 300).isPresent()
-        assert !new ElsComponent().retrieveELSInteratively("JONATHAN", book, 5, false, 10, 20).isPresent()
+        assert !new ElsComponent().retrieveELS("ABCDEFGH", book, 5, false, 0, 1000, SearchMode.ITERATIVE).isPresent()
+        assert !new ElsComponent().retrieveELS("JONATHAN", book, 5, false, 200, 300, SearchMode.ITERATIVE).isPresent()
+        assert !new ElsComponent().retrieveELS("JONATHAN", book, 5, false, 10, 20, SearchMode.ITERATIVE).isPresent()
     }
 
     @Test
@@ -88,7 +88,7 @@ class ElsComponentUnitTest {
         final String search = "JONATHAN"
         def radius = 3
 
-        def elsOptional = new ElsComponent().retrieveELSInteratively(search, book, radius, false, 60, 100)
+        def elsOptional = new ElsComponent().retrieveELS(search, book, radius, false, 60, 100, SearchMode.ITERATIVE)
         assert elsOptional.isPresent()
 
         def equidistantLetterSequence = elsOptional.get()
@@ -104,7 +104,7 @@ class ElsComponentUnitTest {
                 "sgaAwww\n" +
                 "sgaNsss\n" == equidistantLetterSequence.matrix
 
-        elsOptional = new ElsComponent().retrieveELSInteratively(search, book, radius, false, 150, 170)
+        elsOptional = new ElsComponent().retrieveELS(search, book, radius, false, 150, 170, SearchMode.ITERATIVE)
         assert elsOptional.isPresent()
 
         equidistantLetterSequence = elsOptional.get()

@@ -5,5 +5,6 @@ data class EquidistantLetterSequence(
         var firstLetterIndex: Int? = null,
         var matrix: String? = null,
         var bookSize: Int? = null,
-        var calculationTime: Long? = null) {
+        var calculationTime: Long? = null,
+        var searchMode: SearchMode? = SearchMode.ITERATIVE) {
 }

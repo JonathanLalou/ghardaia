@@ -3,7 +3,6 @@ package fr.sayasoft.ghardaia
 import groovy.util.logging.Log4j2
 import org.apache.commons.lang3.StringUtils
 import org.springframework.stereotype.Component
-import org.springframework.util.Assert
 
 import java.time.Duration
 import java.time.LocalDateTime
@@ -43,15 +42,51 @@ class ElsComponent {
         return Optional.empty()
     }
 
-    Optional<EquidistantLetterSequence> retrieveELS(String search, String book, Integer radius = 5, Boolean includeReverseOrder = false, Integer minDistance = 0, Integer maxDistance = 1000) {
-        return retrieveELSByRegexp(search, book, radius, minDistance, maxDistance)
-    }
-
-    protected Optional<EquidistantLetterSequence> retrieveELSByRegexp(String search, String book, Integer radius = 5, Boolean includeReverseOrder = false, Integer minDistance = 0, Integer maxDistance = 1000) {
+    Optional<EquidistantLetterSequence> retrieveELS(String search, String book, Integer radius = 5, Boolean includeReverseOrder = false, Integer minDistance = 0, Integer maxDistance = 1000, SearchMode searchMode = SearchMode.ITERATIVE) {
         log.info("Searching for...   : ${search}")
         final LocalDateTime t0 = LocalDateTime.now();
         def searchSize = search.size()
         Integer shortestEquidistantSequence, firstLetterIndex
+
+        switch (searchMode) {
+            case SearchMode.REGEXP:
+                (shortestEquidistantSequence, firstLetterIndex) = searchWithRegexp(minDistance, maxDistance, searchSize, search, book)
+                break
+            case SearchMode.ITERATIVE:
+            default:
+                (shortestEquidistantSequence, firstLetterIndex) = searchIteratively(search, minDistance, maxDistance, searchSize, book)
+                break
+        }
+
+        if (null == shortestEquidistantSequence) {
+            return Optional.empty()
+        }
+        final StringBuilder matrixBuilder = new StringBuilder()
+        for (int i = 0; i < searchSize; i++) {
+            matrixBuilder.append(substring(book, firstLetterIndex + (i * shortestEquidistantSequence) - radius + i, firstLetterIndex + (i * shortestEquidistantSequence) + radius + i + 1)).append("\n")
+        }
+        def equidistantLetterSequence = new EquidistantLetterSequence(
+                distance: shortestEquidistantSequence,
+                firstLetterIndex: firstLetterIndex,
+                matrix: matrixBuilder.toString(),
+                bookSize: book.size(),
+                calculationTime: Math.abs(Duration.between(t0, LocalDateTime.now()).toMillis()),
+                searchMode: searchMode
+        )
+
+        log.info("searchMode         : ${equidistantLetterSequence.searchMode}")
+        log.info("Book size          : ${equidistantLetterSequence.bookSize} letters")
+        log.info("Calculation time   : ${equidistantLetterSequence.calculationTime} ms")
+        log.info("Shortest sequence  : ${equidistantLetterSequence.distance} letters")
+        log.info("First letter index : #${equidistantLetterSequence.firstLetterIndex}")
+        log.info("Matrix             : \n" + StringUtils.leftPad("*", radius + 1) + "\n" + equidistantLetterSequence.matrix + StringUtils.leftPad("*", radius + 1))
+
+        return Optional.of(equidistantLetterSequence)
+    }
+
+
+    protected List searchWithRegexp(int minDistance, int maxDistance, int searchSize, String search, String book) {
+        Integer shortestEquidistantSequence = null, firstLetterIndex = null
 
         for (int step = minDistance; step < maxDistance; step++) {
             if (log.isTraceEnabled()) log.trace("Testing step: ${step}")
@@ -69,39 +104,12 @@ class ElsComponent {
                 break
             }
         }
-        if (null == shortestEquidistantSequence) {
-            return Optional.empty()
-        }
-        final StringBuilder matrixBuilder = new StringBuilder()
-        for (int i = 0; i < searchSize; i++) {
-            matrixBuilder.append(substring(book, firstLetterIndex + (i * shortestEquidistantSequence) - radius + i, firstLetterIndex + (i * shortestEquidistantSequence) + radius + i + 1)).append("\n")
-        }
-        def equidistantLetterSequence = new EquidistantLetterSequence(
-                distance: shortestEquidistantSequence,
-                firstLetterIndex: firstLetterIndex,
-                matrix: matrixBuilder.toString(),
-                bookSize: book.size(),
-                calculationTime: Math.abs(Duration.between(t0, LocalDateTime.now()).toMillis())
-        )
-
-        log.info("Book size          : ${equidistantLetterSequence.bookSize} letters")
-        log.info("Calculation time   : ${equidistantLetterSequence.calculationTime} ms")
-        log.info("Shortest sequence  : ${equidistantLetterSequence.distance} letters")
-        log.info("First letter index : #${equidistantLetterSequence.firstLetterIndex}")
-        log.info("Matrix             : \n" + equidistantLetterSequence.matrix)
-
-        return Optional.of(
-                equidistantLetterSequence
-        )
+        [shortestEquidistantSequence, firstLetterIndex]
     }
 
-    protected Optional<EquidistantLetterSequence> retrieveELSInteratively(String search, String book, Integer radius = 5, Boolean includeReverseOrder = false, Integer minDistance = 0, Integer maxDistance = 1000) {
-        log.info("Searching for...   : ${search}")
-        Assert.notNull(search, "search cannot be null")
 
-        final LocalDateTime t0 = LocalDateTime.now();
-        def searchSize = search.size()
-        Integer shortestEquidistantSequence, firstLetterIndex
+    private List searchIteratively(String search, int minDistance, int maxDistance, int searchSize, String book) {
+        Integer shortestEquidistantSequence = null, firstLetterIndex = null
         Integer currentIndex
         final List<Character> characters = search.toCharArray().toList();
         Boolean match
@@ -124,6 +132,7 @@ class ElsComponent {
                     Character currentChar = characters[i];
                     if (book.charAt(currentIndex + i * (step + 1)).equals(currentChar)) {
                         match &= true
+                        log.trace("Found letter: ${currentChar}!")
                     } else {
                         match = false
                         break // break for i
@@ -132,34 +141,12 @@ class ElsComponent {
                 if (match) {
                     shortestEquidistantSequence = step
                     firstLetterIndex = currentIndex
+                    log.trace("Found complete match!")
                     break // break while
                 }
             }
             if (match) break // break for step
         }
-        if (null == shortestEquidistantSequence) {
-            return Optional.empty()
-        }
-        final StringBuilder matrixBuilder = new StringBuilder()
-        for (int i = 0; i < searchSize; i++) {
-            matrixBuilder.append(substring(book, firstLetterIndex + (i * shortestEquidistantSequence) - radius + i, firstLetterIndex + (i * shortestEquidistantSequence) + radius + i + 1)).append("\n")
-        }
-        def equidistantLetterSequence = new EquidistantLetterSequence(
-                distance: shortestEquidistantSequence,
-                firstLetterIndex: firstLetterIndex,
-                matrix: matrixBuilder.toString(),
-                bookSize: book.size(),
-                calculationTime: Math.abs(Duration.between(t0, LocalDateTime.now()).toMillis())
-        )
-
-        log.info("Book size          : ${equidistantLetterSequence.bookSize} letters")
-        log.info("Calculation time   : ${equidistantLetterSequence.calculationTime} ms")
-        log.info("Shortest sequence  : ${equidistantLetterSequence.distance} letters")
-        log.info("First letter index : #${equidistantLetterSequence.firstLetterIndex}")
-        log.info("Matrix             : \n" + equidistantLetterSequence.matrix)
-
-        return Optional.of(
-                equidistantLetterSequence
-        )
+        [shortestEquidistantSequence, firstLetterIndex]
     }
 }
