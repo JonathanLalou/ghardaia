@@ -12,7 +12,7 @@ Configuration:
         pattern: "%d{ISO8601}{GMT-4} %-5p %-35c{2} - %m%n"
   Loggers:
     Root:
-      level: debug
+      level: trace
       AppenderRef:
         - ref: Console_Appender
-          level: debug
+          level: trace
