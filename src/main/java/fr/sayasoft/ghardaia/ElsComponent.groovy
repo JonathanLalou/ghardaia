@@ -42,20 +42,21 @@ class ElsComponent {
         return Optional.empty()
     }
 
-    Optional<EquidistantLetterSequence> retrieveELS(String search, String book, Integer radius = 5, Boolean includeReverseOrder = false, Integer minDistance = 0, Integer maxDistance = 1000, SearchMode searchMode = SearchMode.ITERATIVE) {
-        log.info("Searching for      : ${search}")
-        log.info("Searching in book  : ${StringUtils.substring(book, 0, 30)}...")
+    Optional<EquidistantLetterSequence> retrieveELS(SearchCriteria searchCriteria) {
+//    Optional<EquidistantLetterSequence> retrieveELS(String search, String book, Integer radius = 5, Boolean includeReverseOrder = false, Integer minDistance = 0, Integer maxDistance = 1000, SearchMode searchMode = SearchMode.ITERATIVE) {
+        log.info("Searching for      : ${searchCriteria.search}")
+        log.info("Searching in book  : ${StringUtils.substring(searchCriteria.book, 0, 30)}...")
         final LocalDateTime t0 = LocalDateTime.now();
-        def searchSize = search.size()
+        def searchSize = searchCriteria.search.size()
         Integer shortestEquidistantSequence, firstLetterIndex
 
-        switch (searchMode) {
+        switch (searchCriteria.searchMode) {
             case SearchMode.REGEXP:
-                (shortestEquidistantSequence, firstLetterIndex) = searchWithRegexp(minDistance, maxDistance, searchSize, search, book)
+                (shortestEquidistantSequence, firstLetterIndex) = searchWithRegexp(searchCriteria.minDistance, searchCriteria.maxDistance, searchSize, searchCriteria.search, searchCriteria.book)
                 break
             case SearchMode.ITERATIVE:
             default:
-                (shortestEquidistantSequence, firstLetterIndex) = searchIteratively(search, minDistance, maxDistance, searchSize, book)
+                (shortestEquidistantSequence, firstLetterIndex) = searchIteratively(searchCriteria.search, searchCriteria.minDistance, searchCriteria.maxDistance, searchSize, searchCriteria.book)
                 break
         }
 
@@ -64,15 +65,15 @@ class ElsComponent {
         }
         final StringBuilder matrixBuilder = new StringBuilder()
         for (int i = 0; i < searchSize; i++) {
-            matrixBuilder.append(substring(book, firstLetterIndex + (i * shortestEquidistantSequence) - radius + i, firstLetterIndex + (i * shortestEquidistantSequence) + radius + i + 1)).append("\n")
+            matrixBuilder.append(substring(searchCriteria.book, firstLetterIndex + (i * shortestEquidistantSequence) - searchCriteria.radius + i, firstLetterIndex + (i * shortestEquidistantSequence) + searchCriteria.radius + i + 1)).append("\n")
         }
         def equidistantLetterSequence = new EquidistantLetterSequence(
                 distance: shortestEquidistantSequence,
                 firstLetterIndex: firstLetterIndex,
                 matrix: matrixBuilder.toString(),
-                bookSize: book.size(),
+                bookSize: searchCriteria.book.size(),
                 calculationTime: Math.abs(Duration.between(t0, LocalDateTime.now()).toMillis()),
-                searchMode: searchMode
+                searchMode: searchCriteria.searchMode
         )
 
         log.info("searchMode         : ${equidistantLetterSequence.searchMode}")
@@ -80,7 +81,7 @@ class ElsComponent {
         log.info("Calculation time   : ${equidistantLetterSequence.calculationTime} ms")
         log.info("Shortest sequence  : ${equidistantLetterSequence.distance} letters")
         log.info("First letter index : #${equidistantLetterSequence.firstLetterIndex}")
-        log.info("Matrix             : \n" + StringUtils.leftPad("*", radius + 1) + "\n" + equidistantLetterSequence.matrix + StringUtils.leftPad("*", radius + 1))
+        log.info("Matrix             : \n" + StringUtils.leftPad("*", searchCriteria.radius + 1) + "\n" + equidistantLetterSequence.matrix + StringUtils.leftPad("*", searchCriteria.radius + 1))
 
         return Optional.of(equidistantLetterSequence)
     }
