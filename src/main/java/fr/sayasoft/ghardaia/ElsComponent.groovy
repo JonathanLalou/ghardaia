@@ -43,7 +43,8 @@ class ElsComponent {
     }
 
     Optional<EquidistantLetterSequence> retrieveELS(String search, String book, Integer radius = 5, Boolean includeReverseOrder = false, Integer minDistance = 0, Integer maxDistance = 1000, SearchMode searchMode = SearchMode.ITERATIVE) {
-        log.info("Searching for...   : ${search}")
+        log.info("Searching for      : ${search}")
+        log.info("Searching in book  : ${StringUtils.substring(book, 0, 30)}...")
         final LocalDateTime t0 = LocalDateTime.now();
         def searchSize = search.size()
         Integer shortestEquidistantSequence, firstLetterIndex
@@ -129,10 +130,10 @@ class ElsComponent {
 
                 match = true
                 for (int i = 0; i < characters.size() && (currentIndex + (i * step) < book.size()); i++) {
-                    Character currentChar = characters[i];
-                    if (book.charAt(currentIndex + i * (step + 1)).equals(currentChar)) {
+                    final Character currentChar = characters[i]
+                    if (book.charAt(currentIndex + i * (step + 1)).toUpperCase().equals(currentChar.toUpperCase())) {
                         match &= true
-                        log.trace("Found letter: ${currentChar}!")
+                        if ((i > 0) && log.isTraceEnabled()) log.trace("Found letter: ${currentChar}!")
                     } else {
                         match = false
                         break // break for i
